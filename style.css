@@ -11,7 +11,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Matrix Background Canvas */
+/* Matrix Rain Canvas */
 #matrixCanvas {
   position: fixed;
   top: 0;
@@ -22,7 +22,7 @@ body {
   pointer-events: none;
 }
 
-/* Login Card Screen */
+/* Login Overlay */
 #loginOverlay {
   position: fixed;
   top: 0;
@@ -149,7 +149,52 @@ body {
   color: #00aa44;
 }
 
-/* Dashboard UI */
+/* Warning Banner */
+.warning-text {
+  color: #ffcc00;
+  background-color: rgba(255, 204, 0, 0.15);
+  border: 1px solid #ffcc00;
+  padding: 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 13px;
+  margin: 12px 0;
+  text-align: center;
+}
+
+/* Quota Info Box */
+.quota-info {
+  font-size: 13px;
+  color: #00ff66;
+  text-align: center;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.quota-exceeded {
+  color: #ff3333 !important;
+  border: 1px solid #ff3333;
+  padding: 12px;
+  background-color: rgba(255, 51, 51, 0.1);
+  border-radius: 4px;
+}
+
+/* Embedded Form Container */
+.form-embed-container {
+  width: 100%;
+  margin-top: 10px;
+  background-color: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.form-embed-container iframe {
+  width: 100%;
+  height: 450px;
+  border: none;
+}
+
+/* Dashboard Navigation */
 #mainDashboard {
   position: relative;
   z-index: 2;
