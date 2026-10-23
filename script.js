@@ -34,11 +34,11 @@ function drawMatrix() {
 
 const matrixInterval = setInterval(drawMatrix, 33);
 
-// --- 2. ACCOUNTS & ROLES DATABASE ---
+// --- 2. UPDATED CREDENTIALS & ACCOUNTS DATABASE ---
 let defaultUsers = [
-  { username: "max", password: "max123", role: "max" },
-  { username: "editor", password: "editor123", role: "editor" },
-  { username: "user", password: "user123", role: "viewer" }
+  { username: "mahassan4", password: "mahassan1210", role: "max" },
+  { username: "admin", password: "traysonlayson", role: "editor" },
+  { username: "person", password: "1234", role: "viewer" }
 ];
 
 let usersDB = JSON.parse(localStorage.getItem("portalUsers")) || defaultUsers;
@@ -98,14 +98,14 @@ function setupDashboardUI() {
   document.getElementById("displayUsername").innerText = activeUser.username;
   document.getElementById("displayRole").innerText = activeUser.role;
 
-  // Max Control Panel Button: Only visible if activeUser role is MAX
+  // Max Control Panel Button: Only visible if activeUser role is MAX (mahassan4)
   if (activeUser.role === "max") {
     document.getElementById("maxPanelBtn").style.display = "inline-block";
   } else {
     document.getElementById("maxPanelBtn").style.display = "none";
   }
 
-  // Editor Controls: Visible if activeUser is Editor OR Max
+  // Editor Controls: Visible if activeUser is Editor (admin) OR Max (mahassan4)
   if (activeUser.role === "editor" || activeUser.role === "max") {
     document.getElementById("editorControls").style.display = "block";
   } else {
@@ -192,7 +192,7 @@ function renderMaxUserTable() {
   container.innerHTML = "";
 
   usersDB.forEach((u, idx) => {
-    if (u.role === "max") return; // Keep Max root account protected
+    if (u.role === "max") return; // Protect Max root user (mahassan4)
 
     const row = document.createElement("div");
     row.className = "user-row";
