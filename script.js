@@ -34,11 +34,11 @@ function drawMatrix() {
 
 const matrixInterval = setInterval(drawMatrix, 33);
 
-// --- 2. UPDATED CREDENTIALS & ACCOUNTS DATABASE ---
+// --- 2. ACCOUNTS DATABASE WITH REQUEST TIMESTAMPS ---
 let defaultUsers = [
-  { username: "mahassan4", password: "mahassan1210", role: "max" },
-  { username: "admin", password: "traysonlayson", role: "editor" },
-  { username: "person", password: "1234", role: "viewer" }
+  { username: "mahassan4", password: "mahassan1210", role: "max", requests: [] },
+  { username: "admin", password: "traysonlayson", role: "editor", requests: [] },
+  { username: "person", password: "1234", role: "viewer", requests: [] }
 ];
 
 let usersDB = JSON.parse(localStorage.getItem("portalUsers")) || defaultUsers;
@@ -48,18 +48,48 @@ function saveUsers() {
   localStorage.setItem("portalUsers", JSON.stringify(usersDB));
 }
 
-// --- 3. DIRECTORY DATA ---
+// --- 3. UNBLOCKER DIRECTORY DATA ---
 let defaultDirectory = {
-  "Primary Hub": [
-    { name: "Server Alpha", url: "https://example.com" }
+  "Opium": [
+    { name: "Opium Node 1", url: "https://example.com" }
   ],
-  "Secondary Hub": [
-    { name: "Server Beta", url: "https://example.org" }
+  "Petezah": [
+    { name: "Petezah Node 1", url: "https://example.com" }
+  ],
+  "Utopia": [
+    { name: "Utopia Node 1", url: "https://example.com" }
+  ],
+  "Glim": [
+    { name: "Glim Node 1", url: "https://example.com" }
+  ],
+  "Dogeub": [
+    { name: "Dogeub Node 1", url: "https://example.com" }
+  ],
+  "Studyhub": [
+    { name: "Studyhub Node 1", url: "https://example.com" }
+  ],
+  "Strawberry": [
+    { name: "Strawberry Node 1", url: "https://example.com" }
+  ],
+  "Red Exploits": [
+    { name: "Red Exploits Node 1", url: "https://example.com" }
+  ],
+  "Aether": [
+    { name: "Aether Node 1", url: "https://example.com" }
+  ],
+  "Kite": [
+    { name: "Kite Node 1", url: "https://example.com" }
+  ],
+  "Rosin": [
+    { name: "Rosin Node 1", url: "https://example.com" }
+  ],
+  "Tung Tung": [
+    { name: "Tung Tung Node 1", url: "https://example.com" }
   ]
 };
 
 let directoryData = JSON.parse(localStorage.getItem("unblockerDirectory")) || defaultDirectory;
-let selectedCategory = "Primary Hub";
+let selectedCategory = "Opium";
 
 function saveDirectory() {
   localStorage.setItem("unblockerDirectory", JSON.stringify(directoryData));
@@ -75,6 +105,7 @@ function attemptLogin() {
 
   if (foundUser) {
     activeUser = foundUser;
+    if (!activeUser.requests) activeUser.requests = [];
     errorMsg.style.display = "none";
     document.getElementById("loginOverlay").style.display = "none";
     document.getElementById("mainDashboard").style.display = "block";
@@ -93,19 +124,17 @@ function logout() {
   document.getElementById("loginOverlay").style.display = "flex";
 }
 
-// --- 5. DASHBOARD & PERMISSIONS UI ---
+// --- 5. DASHBOARD UI SETUP ---
 function setupDashboardUI() {
   document.getElementById("displayUsername").innerText = activeUser.username;
   document.getElementById("displayRole").innerText = activeUser.role;
 
-  // Max Control Panel Button: Only visible if activeUser role is MAX (mahassan4)
   if (activeUser.role === "max") {
     document.getElementById("maxPanelBtn").style.display = "inline-block";
   } else {
     document.getElementById("maxPanelBtn").style.display = "none";
   }
 
-  // Editor Controls: Visible if activeUser is Editor (admin) OR Max (mahassan4)
   if (activeUser.role === "editor" || activeUser.role === "max") {
     document.getElementById("editorControls").style.display = "block";
   } else {
@@ -116,7 +145,55 @@ function setupDashboardUI() {
   renderLinks();
 }
 
-// --- 6. DIRECTORY CATEGORIES & LINKS ---
+// --- 6. WEEKLY REQUEST LIMIT LOGIC ---
+function getRecentRequestCount(user) {
+  if (!user || !user.requests) return 0;
+  const oneWeekAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+  return user.requests.filter(timestamp => timestamp > oneWeekAgo).length;
+}
+
+function getWeeklyQuota(role) {
+  if (role === "max") return Infinity;
+  if (role === "editor" || role === "admin") return 4;
+  return 2;
+}
+
+function openRequestModal() {
+  openModal('requestModal');
+  const quotaMsg = document.getElementById("requestQuotaMsg");
+  const formContainer = document.getElementById("formContainer");
+
+  const role = activeUser ? activeUser.role : "viewer";
+  const quota = getWeeklyQuota(role);
+  const used = activeUser ? getRecentRequestCount(activeUser) : 0;
+
+  if (quota === Infinity) {
+    quotaMsg.className = "quota-info";
+    quotaMsg.innerText = "⚡ Max/Owner Access: Unlimited Requests Allowed.";
+    formContainer.style.display = "block";
+  } else {
+    const remaining = quota - used;
+    if (remaining > 0) {
+      quotaMsg.className = "quota-info";
+      quotaMsg.innerText = `Weekly Allowance: You have used ${used}/${quota} requests standard for your rank. (${remaining} remaining this week)`;
+      formContainer.style.display = "block";
+    } else {
+      quotaMsg.className = "quota-info quota-exceeded";
+      quotaMsg.innerText = `❌ WEEKLY LIMIT REACHED (${used}/${quota}). You must wait until 7 days pass from your earlier requests before submitting new ones.`;
+      formContainer.style.display = "none";
+    }
+  }
+}
+
+function trackUserRequest() {
+  if (activeUser) {
+    if (!activeUser.requests) activeUser.requests = [];
+    activeUser.requests.push(Date.now());
+    saveUsers();
+  }
+}
+
+// --- 7. DIRECTORY RENDERERS ---
 function renderCategories() {
   const container = document.getElementById("unblockerCategories");
   container.innerHTML = "";
@@ -136,13 +213,13 @@ function renderCategories() {
 
 function renderLinks() {
   const container = document.getElementById("linksList");
-  document.getElementById("selectedUnblockerTitle").innerText = `${selectedCategory} - Active Working Links`;
+  document.getElementById("selectedUnblockerTitle").innerText = `${selectedCategory} - Active Links`;
   container.innerHTML = "";
 
   const links = directoryData[selectedCategory] || [];
 
   if (links.length === 0) {
-    container.innerHTML = "<p>No working links stored for this service yet.</p>";
+    container.innerHTML = "<p>No active links stored for this category yet.</p>";
     return;
   }
 
@@ -151,7 +228,7 @@ function renderLinks() {
     row.className = "link-row";
 
     let deleteBtn = "";
-    if (activeUser.role === "editor" || activeUser.role === "max") {
+    if (activeUser && (activeUser.role === "editor" || activeUser.role === "max")) {
       deleteBtn = `<button class="delete-btn" onclick="removeLink(${idx})">Delete</button>`;
     }
 
@@ -186,13 +263,13 @@ function removeLink(index) {
   renderLinks();
 }
 
-// --- 7. DEDICATED MAX CONTROL PANEL ---
+// --- 8. DEDICATED MAX CONTROL PANEL ---
 function renderMaxUserTable() {
   const container = document.getElementById("usersListContainer");
   container.innerHTML = "";
 
   usersDB.forEach((u, idx) => {
-    if (u.role === "max") return; // Protect Max root user (mahassan4)
+    if (u.role === "max") return;
 
     const row = document.createElement("div");
     row.className = "user-row";
@@ -217,7 +294,7 @@ function addUserByMax() {
   const uRole = document.getElementById("newRole").value;
 
   if (uName && uPass) {
-    usersDB.push({ username: uName, password: uPass, role: uRole });
+    usersDB.push({ username: uName, password: uPass, role: uRole, requests: [] });
     saveUsers();
     document.getElementById("newUsername").value = "";
     document.getElementById("newPassword").value = "";
@@ -236,7 +313,7 @@ function removeUserByMax(index) {
   renderMaxUserTable();
 }
 
-// --- 8. MODAL HELPERS ---
+// --- 9. MODAL CONTROLS ---
 function openModal(id) {
   document.getElementById(id).style.display = "flex";
   if (id === "maxModal") renderMaxUserTable();
